@@ -39,41 +39,56 @@ const FEEDS: Record<string, Feed[]> = {
     { url: "https://economictimes.indiatimes.com/rssfeedstopstories.cms", source: "Economic Times" },
     { url: "https://www.moneycontrol.com/rss/latestnews.xml", source: "Moneycontrol" },
     { url: "https://www.business-standard.com/rss/markets-106.rss", source: "Business Standard" },
+    { url: "https://www.livemint.com/rss", source: "Mint" },
   ],
   markets: [
     { url: "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms", source: "Economic Times" },
     { url: "https://www.moneycontrol.com/rss/marketreports.xml", source: "Moneycontrol" },
     { url: "https://www.business-standard.com/rss/markets-106.rss", source: "Business Standard" },
+    { url: "https://www.livemint.com/rss/markets", source: "Mint" },
   ],
   ipo: [
     { url: "https://economictimes.indiatimes.com/markets/ipos/fpos/rssfeeds/1977015348.cms", source: "Economic Times" },
     { url: "https://www.moneycontrol.com/rss/ipo.xml", source: "Moneycontrol" },
+    { url: "https://www.livemint.com/rss/ipo", source: "Mint" },
   ],
   economy: [
     { url: "https://economictimes.indiatimes.com/news/economy/rssfeeds/1373380680.cms", source: "Economic Times" },
     { url: "https://www.moneycontrol.com/rss/economy.xml", source: "Moneycontrol" },
+    { url: "https://www.business-standard.com/rss/economy-110.rss", source: "Business Standard" },
+    { url: "https://www.livemint.com/rss/economy", source: "Mint" },
   ],
   companies: [
     { url: "https://economictimes.indiatimes.com/industry/rssfeeds/13352306.cms", source: "Economic Times" },
     { url: "https://www.moneycontrol.com/rss/business.xml", source: "Moneycontrol" },
+    { url: "https://www.business-standard.com/rss/companies-113.rss", source: "Business Standard" },
+    { url: "https://www.livemint.com/rss/companies", source: "Mint" },
   ],
   technology: [
     { url: "https://economictimes.indiatimes.com/tech/rssfeeds/13357270.cms", source: "Economic Times" },
     { url: "https://www.moneycontrol.com/rss/technology.xml", source: "Moneycontrol" },
+    { url: "https://www.business-standard.com/rss/technology-108.rss", source: "Business Standard" },
+    { url: "https://www.livemint.com/rss/technology", source: "Mint" },
   ],
   startups: [
     { url: "https://economictimes.indiatimes.com/tech/startups/rssfeeds/76054874.cms", source: "ET Tech" },
     { url: "https://economictimes.indiatimes.com/small-biz/rssfeeds/5575607.cms", source: "Economic Times" },
+    { url: "https://www.business-standard.com/rss/startups-113.rss", source: "Business Standard" },
+    { url: "https://www.livemint.com/rss/startups", source: "Mint" },
   ],
   wealth: [
     { url: "https://economictimes.indiatimes.com/wealth/rssfeeds/837555174.cms", source: "Economic Times" },
     { url: "https://www.moneycontrol.com/rss/personalfinance.xml", source: "Moneycontrol" },
+    { url: "https://www.business-standard.com/rss/personal-finance-117.rss", source: "Business Standard" },
+    { url: "https://www.livemint.com/rss/wealth", source: "Mint" },
   ],
   world: [
     { url: "https://economictimes.indiatimes.com/news/international/rssfeeds/7771250.cms", source: "Economic Times" },
     { url: "https://www.moneycontrol.com/rss/economy.xml", source: "Moneycontrol" },
+    { url: "https://www.business-standard.com/rss/international-111.rss", source: "Business Standard" },
+    { url: "https://www.livemint.com/rss/world", source: "Mint" },
   ],
-}
+};
 
 const parser = new XMLParser({
   ignoreAttributes: false,
