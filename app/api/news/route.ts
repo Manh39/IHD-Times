@@ -10,18 +10,20 @@ function localGenZTitle(title: string): string {
   let t = title
     .replace(/^SEBI approves|^Sebi approves/i, "SEBI Just Greenlit")
     .replace(/^RBI slaps|^RBI imposes/i, "RBI Drops Penalty On")
-    .replace(/^Sensex rises|^Nifty jumps|^Markets rally/i, "Markets Pop Big")
-    .replace(/^Sensex falls|^Nifty tumbles|^Markets crash/i, "Markets Take a Hit")
-    .replace(/shares rise|shares surge|stock surges/gi, "shares pop")
-    .replace(/shares fall|shares slump|shares tumble|stock drops/gi, "shares dip")
-    .replace(/record high/gi, "all-time high")
-    .replace(/amid concerns over/gi, "over")
-    .replace(/according to reports|according to sources/gi, "per sources")
-    .replace(/significant growth/gi, "solid gains")
-    .replace(/strategic partnership/gi, "big collab")
+    .replace(/Sensex slides|Sensex falls|Sensex drops|Nifty tumbles|Nifty slides|Nifty falls|Markets tumble|Markets fall/gi, "Markets Take a Hit")
+    .replace(/Sensex rises|Sensex gains|Sensex surges|Nifty rallies|Nifty jumps|Markets rally|Markets surge/gi, "Markets Pop Big")
+    .replace(/shares rise|shares surge|stock surges|stocks climb|shares gain/gi, "shares pop")
+    .replace(/shares fall|shares slump|shares tumble|stock drops|shares decline|shares slide/gi, "shares dip")
+    .replace(/record high|all-time peak/gi, "all-time high")
+    .replace(/amid concerns over|amid worries over/gi, "over")
+    .replace(/according to reports|according to sources|sources say/gi, "per sources")
+    .replace(/significant growth|massive growth/gi, "solid gains")
+    .replace(/strategic partnership|enters into agreement with/gi, "big collab with")
     .replace(/acquisition of/gi, "buying")
-    .replace(/quarterly profit/gi, "Q-earnings")
-    .replace(/layoffs at/gi, "cuts at")
+    .replace(/quarterly profit|net profit rises/gi, "Q-earnings pop")
+    .replace(/net profit falls|profit drops/gi, "Q-earnings miss")
+    .replace(/layoffs at|cuts workforce at/gi, "cuts jobs at")
+    .replace(/slams|criticises|condemns/gi, "calls out")
     .trim()
 
   return t
@@ -30,14 +32,16 @@ function localGenZTitle(title: string): string {
 // Smart rule-based Gen-Z quick overview summarizer
 function localGenZSummary(rawSummary: string, title: string): string {
   if (!rawSummary || rawSummary.length < 20) {
-    return `Here’s the deal: this story is developing fast around ${title.slice(0, 50)}. Tap source to read the full breakdown.`
+    return `Quick take: Things are moving fast around ${title.slice(0, 50)}. Check the full story at the original source.`
   }
 
   // Clean and split into sentences
   const cleaned = rawSummary
+    .replace(/&nbsp;/gi, " ")
     .replace(/\s+/g, " ")
     .replace(/Also Read:.*$/i, "")
     .replace(/Read more at:.*$/i, "")
+    .replace(/Click here to.*$/i, "")
     .trim()
 
   const sentences = cleaned.split(/(?<=[.?!])\s+/).filter(Boolean)
