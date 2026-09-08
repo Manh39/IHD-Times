@@ -16,7 +16,7 @@ export default function Page() {
             © {new Date().getFullYear()} IHD Times · Headlines aggregated from public newswires
           </p>
           <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
-            Economic Times · Moneycontrol · Business Standard
+            Economic Times · LiveMint · Moneycontrol · Business Standard
           </p>
         </div>
       </footer>

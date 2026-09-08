@@ -33,60 +33,65 @@ export const CATEGORIES: Category[] = [
 
 type Feed = { url: string; source: string }
 
-// Real financial news RSS feeds, grouped by category.
+// Real financial news RSS feeds, grouped by category with multiple reliable mirrors.
 const FEEDS: Record<string, Feed[]> = {
   all: [
     { url: "https://economictimes.indiatimes.com/rssfeedstopstories.cms", source: "Economic Times" },
+    { url: "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms", source: "Economic Times" },
+    { url: "https://www.livemint.com/rss", source: "Mint" },
+    { url: "https://www.livemint.com/rss/news", source: "Mint" },
     { url: "https://www.moneycontrol.com/rss/latestnews.xml", source: "Moneycontrol" },
     { url: "https://www.business-standard.com/rss/markets-106.rss", source: "Business Standard" },
-    { url: "https://www.livemint.com/rss", source: "Mint" },
+    { url: "https://www.business-standard.com/rss/latest.rss", source: "Business Standard" },
   ],
   markets: [
     { url: "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms", source: "Economic Times" },
+    { url: "https://economictimes.indiatimes.com/markets/stocks/rssfeeds/2146842.cms", source: "Economic Times" },
+    { url: "https://www.livemint.com/rss/markets", source: "Mint" },
     { url: "https://www.moneycontrol.com/rss/marketreports.xml", source: "Moneycontrol" },
     { url: "https://www.business-standard.com/rss/markets-106.rss", source: "Business Standard" },
-    { url: "https://www.livemint.com/rss/markets", source: "Mint" },
   ],
   ipo: [
     { url: "https://economictimes.indiatimes.com/markets/ipos/fpos/rssfeeds/1977015348.cms", source: "Economic Times" },
-    { url: "https://www.moneycontrol.com/rss/ipo.xml", source: "Moneycontrol" },
     { url: "https://www.livemint.com/rss/ipo", source: "Mint" },
+    { url: "https://www.moneycontrol.com/rss/ipo.xml", source: "Moneycontrol" },
+    { url: "https://www.business-standard.com/rss/markets-ipo-112.rss", source: "Business Standard" },
   ],
   economy: [
     { url: "https://economictimes.indiatimes.com/news/economy/rssfeeds/1373380680.cms", source: "Economic Times" },
+    { url: "https://www.livemint.com/rss/economy", source: "Mint" },
     { url: "https://www.moneycontrol.com/rss/economy.xml", source: "Moneycontrol" },
     { url: "https://www.business-standard.com/rss/economy-110.rss", source: "Business Standard" },
-    { url: "https://www.livemint.com/rss/economy", source: "Mint" },
   ],
   companies: [
     { url: "https://economictimes.indiatimes.com/industry/rssfeeds/13352306.cms", source: "Economic Times" },
+    { url: "https://www.livemint.com/rss/companies", source: "Mint" },
     { url: "https://www.moneycontrol.com/rss/business.xml", source: "Moneycontrol" },
     { url: "https://www.business-standard.com/rss/companies-113.rss", source: "Business Standard" },
-    { url: "https://www.livemint.com/rss/companies", source: "Mint" },
   ],
   technology: [
     { url: "https://economictimes.indiatimes.com/tech/rssfeeds/13357270.cms", source: "Economic Times" },
+    { url: "https://www.livemint.com/rss/technology", source: "Mint" },
     { url: "https://www.moneycontrol.com/rss/technology.xml", source: "Moneycontrol" },
     { url: "https://www.business-standard.com/rss/technology-108.rss", source: "Business Standard" },
-    { url: "https://www.livemint.com/rss/technology", source: "Mint" },
   ],
   startups: [
-    { url: "https://economictimes.indiatimes.com/tech/startups/rssfeeds/76054874.cms", source: "ET Tech" },
+    { url: "https://economictimes.indiatimes.com/tech/startups/rssfeeds/76054874.cms", source: "Economic Times" },
     { url: "https://economictimes.indiatimes.com/small-biz/rssfeeds/5575607.cms", source: "Economic Times" },
-    { url: "https://www.business-standard.com/rss/startups-113.rss", source: "Business Standard" },
     { url: "https://www.livemint.com/rss/startups", source: "Mint" },
+    { url: "https://www.business-standard.com/rss/startups-113.rss", source: "Business Standard" },
   ],
   wealth: [
     { url: "https://economictimes.indiatimes.com/wealth/rssfeeds/837555174.cms", source: "Economic Times" },
+    { url: "https://www.livemint.com/rss/wealth", source: "Mint" },
     { url: "https://www.moneycontrol.com/rss/personalfinance.xml", source: "Moneycontrol" },
     { url: "https://www.business-standard.com/rss/personal-finance-117.rss", source: "Business Standard" },
-    { url: "https://www.livemint.com/rss/wealth", source: "Mint" },
   ],
   world: [
     { url: "https://economictimes.indiatimes.com/news/international/rssfeeds/7771250.cms", source: "Economic Times" },
+    { url: "https://www.livemint.com/rss/world", source: "Mint" },
     { url: "https://www.moneycontrol.com/rss/economy.xml", source: "Moneycontrol" },
     { url: "https://www.business-standard.com/rss/international-111.rss", source: "Business Standard" },
-    { url: "https://www.livemint.com/rss/world", source: "Mint" },
   ],
 };
 
@@ -96,7 +101,7 @@ const parser = new XMLParser({
   trimValues: true,
 })
 
-function stripHtml(input: string): string {
+function cleanSummary(input: string): string {
   return input
     .replace(/<!\[CDATA\[|\]\]>/g, "")
     .replace(/<[^>]*>/g, " ")
@@ -106,8 +111,15 @@ function stripHtml(input: string): string {
     .replace(/&quot;/g, '"')
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
+    .replace(/Also Read:.*$/i, "")
+    .replace(/Read more at:.*$/i, "")
+    .replace(/Click here to.*$/i, "")
     .replace(/\s+/g, " ")
     .trim()
+}
+
+function stripHtml(input: string): string {
+  return cleanSummary(input)
 }
 
 function firstImage(item: Record<string, any>): string | undefined {
@@ -143,17 +155,22 @@ function toText(value: unknown): string {
 
 async function fetchFeed(feed: Feed, category: string, noStore: boolean): Promise<NewsItem[]> {
   try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 8000)
+
     const res = await fetch(feed.url, {
+      signal: controller.signal,
       headers: {
-        // Some publishers reject requests without a browser-like UA.
         "User-Agent":
-          "Mozilla/5.0 (compatible; CapitalLedgerBot/1.0; +https://vercel.com)",
-        Accept: "application/rss+xml, application/xml, text/xml, */*",
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        Accept: "application/rss+xml, application/xml, text/xml, text/html, */*",
+        "Accept-Language": "en-US,en;q=0.9",
       },
       ...(noStore
         ? { cache: "no-store" as const }
-        : { next: { revalidate: 300 } }),
+        : { next: { revalidate: 180 } }),
     })
+    clearTimeout(timeout)
     if (!res.ok) return []
     const xml = await res.text()
     const parsed = parser.parse(xml)
@@ -166,7 +183,7 @@ async function fetchFeed(feed: Feed, category: string, noStore: boolean): Promis
     return items
       .map((item: Record<string, any>): NewsItem | null => {
         const title = stripHtml(toText(item.title))
-        if (!title) return null
+        if (!title || title.length < 5) return null
 
         let link = ""
         if (typeof item.link === "string") link = item.link
@@ -175,7 +192,7 @@ async function fetchFeed(feed: Feed, category: string, noStore: boolean): Promis
         link = link || toText(item.guid)
 
         const rawSummary = toText(item.description ?? item.summary ?? item["content:encoded"])
-        const summary = stripHtml(rawSummary).slice(0, 260)
+        const summary = cleanSummary(rawSummary).slice(0, 300)
 
         const dateStr = toText(item.pubDate ?? item.published ?? item.updated ?? "")
         const pubMs = dateStr ? new Date(dateStr).getTime() : Date.now()
@@ -204,28 +221,28 @@ export async function getNews(categoryId: string, noStore = false): Promise<News
 
   let all = results.flatMap((r) => (r.status === "fulfilled" ? r.value : []))
 
-  // IPO-specific RSS feeds can be empty or temporarily blocked. Fall back to
-  // the live markets feeds and keep only IPO-related stories so the tab never
-  // renders blank when publishers change their feed URLs.
-  if (categoryId === "ipo" && all.length === 0) {
+  // Fallback for categories with fewer items (like IPO)
+  if (categoryId === "ipo" && all.length < 5) {
     const marketResults = await Promise.allSettled(
       FEEDS.markets.map((f) => fetchFeed(f, "ipo", noStore)),
     )
-    all = marketResults
+    const extra = marketResults
       .flatMap((r) => (r.status === "fulfilled" ? r.value : []))
-      .filter((item) => /ipo|initial public|listing|public issue|offer price|share sale/i.test(item.title))
+      .filter((item) => /ipo|listing|public issue|share sale|drhp|debut|allotment/i.test(item.title))
+    all = [...all, ...extra]
   }
 
-  // Dedupe by normalized title.
+  // Dedupe by normalized alphanumeric signature
   const seen = new Set<string>()
   const deduped: NewsItem[] = []
   for (const item of all) {
-    const key = item.title.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 60)
+    const key = item.title.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 45)
     if (seen.has(key)) continue
     seen.add(key)
     deduped.push(item)
   }
 
   deduped.sort((a, b) => b.pubMs - a.pubMs)
-  return deduped.slice(0, 24)
+  // Deliver top 36 fresh stories for full broadsheet coverage
+  return deduped.slice(0, 36)
 }

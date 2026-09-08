@@ -52,6 +52,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${playfair.variable} ${sourceSerif.variable} bg-background`}
     >
       <head>

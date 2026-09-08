@@ -41,93 +41,76 @@ function Kicker({ item }: { item: NewsItem }) {
   )
 }
 
-function LeadStory({ item }: { item: NewsItem }) {
+function NewsCard({ item }: { item: NewsItem }) {
   return (
-    <article className="border-b border-border pb-5">
-      <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
-        Lead Editorial Story
-      </p>
-      <Kicker item={item} />
-      <a href={item.link} target="_blank" rel="noopener noreferrer" className="group block">
-        <h2 className="text-balance font-serif text-[26px] font-black leading-[1.1] text-foreground group-hover:text-primary sm:text-[32px]">
-          {item.displayTitle ?? item.title}
-        </h2>
-      </a>
-      {item.image && (
-        <img
-          src={item.image || "/placeholder.svg"}
-          alt=""
-          className="mt-3 aspect-[16/8] w-full border border-border object-cover"
-          crossOrigin="anonymous"
-          onError={(e) => {
-            ;(e.currentTarget as HTMLImageElement).style.display = "none"
-          }}
-        />
-      )}
-      {item.summary && (
-        <p className="drop-cap mt-3 font-sans text-[15px] leading-relaxed text-foreground">
-          {item.summary}
-        </p>
-      )}
-      <a
-        href={item.link}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold uppercase tracking-widest text-primary hover:underline"
-      >
-        Read More <span aria-hidden>&rarr;</span>
-      </a>
+    <article className="group flex flex-col justify-between border border-border bg-card p-4 transition-all duration-200 hover:border-foreground/40 hover:shadow-sm">
+      <div>
+        <Kicker item={item} />
+        <a
+          href={item.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block"
+        >
+          <h3 className="text-pretty font-serif text-[17px] font-bold leading-snug text-foreground transition-colors group-hover:text-primary sm:text-[19px]">
+            {item.displayTitle ?? item.title}
+          </h3>
+        </a>
+
+        {item.image && (
+          <div className="mt-3 overflow-hidden border border-border bg-muted">
+            <img
+              src={item.image}
+              alt=""
+              className="aspect-[16/9] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              crossOrigin="anonymous"
+              onError={(e) => {
+                ;(e.currentTarget as HTMLImageElement).style.display = "none"
+              }}
+            />
+          </div>
+        )}
+
+        {item.summary && (
+          <p className="mt-2.5 font-sans text-[13.5px] leading-relaxed text-muted-foreground">
+            {item.summary}
+          </p>
+        )}
+      </div>
+
+      <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
+        <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+          {timeAgo(item.pubDate)}
+        </span>
+        <a
+          href={item.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 font-sans text-[11.5px] font-bold uppercase tracking-wider text-primary hover:underline"
+        >
+          Read More <span aria-hidden>&rarr;</span>
+        </a>
+      </div>
     </article>
   )
 }
 
-function DossierCard({ item }: { item: NewsItem }) {
+function SkeletonCard() {
   return (
-    <article className="flex flex-col border-b border-border pb-4">
-      <Kicker item={item} />
-      <a href={item.link} target="_blank" rel="noopener noreferrer" className="group block">
-        <h3 className="text-pretty font-serif text-[17px] font-bold leading-snug text-foreground group-hover:text-primary">
-          {item.displayTitle ?? item.title}
-        </h3>
-      </a>
-      {item.summary && (
-        <p className="mt-1.5 line-clamp-3 font-sans text-[13px] leading-relaxed text-muted-foreground">
-          {item.summary}
-        </p>
-      )}
-    </article>
-  )
-}
-
-function BriefRow({ item }: { item: NewsItem }) {
-  return (
-    <li className="flex items-baseline gap-3 border-b border-border py-2 last:border-b-0">
-      <time className="shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground" dateTime={item.pubDate}>
-        {timeAgo(item.pubDate)}
-      </time>
-      <a
-        href={item.link}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="font-sans text-[13.5px] leading-snug text-foreground hover:text-primary"
-      >
-        {item.displayTitle ?? item.title}
-      </a>
-    </li>
-  )
-}
-
-function SkeletonBlock() {
-  return (
-    <div className="animate-pulse space-y-4" aria-hidden>
-      <div className="h-3 w-32 bg-muted" />
-      <div className="h-8 w-full bg-muted" />
-      <div className="h-8 w-3/4 bg-muted" />
-      <div className="aspect-[16/8] w-full bg-muted" />
+    <div className="animate-pulse border border-border bg-card p-4" aria-hidden>
+      <div className="mb-2 h-3 w-28 bg-muted" />
       <div className="space-y-2">
+        <div className="h-5 w-full bg-muted" />
+        <div className="h-5 w-3/4 bg-muted" />
+      </div>
+      <div className="mt-3 aspect-[16/9] w-full bg-muted" />
+      <div className="mt-3 space-y-1.5">
         <div className="h-3 w-full bg-muted" />
-        <div className="h-3 w-full bg-muted" />
-        <div className="h-3 w-2/3 bg-muted" />
+        <div className="h-3 w-4/5 bg-muted" />
+      </div>
+      <div className="mt-4 flex justify-between border-t border-border pt-3">
+        <div className="h-3 w-16 bg-muted" />
+        <div className="h-3 w-20 bg-muted" />
       </div>
     </div>
   )
@@ -147,9 +130,6 @@ export function Newspaper() {
   )
 
   const items = data?.items ?? []
-  const [lead, ...rest] = items
-  const dossier = rest.slice(0, 6)
-  const briefs = rest.slice(6, 18)
 
   async function handleRefresh() {
     await mutate(fetcher(`/api/news?category=${category}&refresh=1`), {
@@ -170,6 +150,10 @@ export function Newspaper() {
             <span className="uppercase tracking-wider">Last Updated:</span>
             <span className="font-mono tabular-nums text-foreground">
               {data?.updatedAt ? clockTime(data.updatedAt) : "—"}
+            </span>
+            <span aria-hidden>·</span>
+            <span className="font-semibold text-foreground">
+              {items.length} Stories Dispatched
             </span>
           </div>
           <button
@@ -211,39 +195,30 @@ export function Newspaper() {
                 </button>
               </div>
             ) : isLoading && items.length === 0 ? (
-              <SkeletonBlock />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-2">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))}
+              </div>
             ) : items.length === 0 ? (
               <p className="py-12 text-center text-muted-foreground">No stories in this section right now.</p>
             ) : (
-              <>
-                {lead && <LeadStory item={lead} />}
+              <div>
+                <div className="mb-4 flex items-center justify-between border-b-2 border-foreground pb-1.5">
+                  <h2 className="font-serif text-[14px] font-bold uppercase tracking-[0.2em] text-foreground">
+                    Live Dispatch · Full Dossier
+                  </h2>
+                  <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                    All Stories Uniform Format
+                  </span>
+                </div>
 
-                {dossier.length > 0 && (
-                  <section className="mt-5">
-                    <h2 className="mb-3 border-b-2 border-foreground pb-1 font-serif text-[13px] font-bold uppercase tracking-[0.2em] text-foreground">
-                      General Dossier &amp; Insights
-                    </h2>
-                    <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
-                      {dossier.map((item) => (
-                        <DossierCard key={item.id} item={item} />
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {briefs.length > 0 && (
-                  <section className="mt-6">
-                    <h2 className="mb-2 border-b-2 border-foreground pb-1 font-serif text-[13px] font-bold uppercase tracking-[0.2em] text-foreground">
-                      News In Brief
-                    </h2>
-                    <ul>
-                      {briefs.map((item) => (
-                        <BriefRow key={item.id} item={item} />
-                      ))}
-                    </ul>
-                  </section>
-                )}
-              </>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-2">
+                  {items.map((item) => (
+                    <NewsCard key={item.id} item={item} />
+                  ))}
+                </div>
+              </div>
             )}
           </div>
 
