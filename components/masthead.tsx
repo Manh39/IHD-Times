@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import useSWR from "swr"
 import { ThemeToggle } from "@/components/theme-toggle"
 
@@ -108,7 +109,9 @@ export function Masthead() {
           <span className="h-px w-10 bg-primary" />
         </div>
         <h1 className="font-serif text-5xl font-black leading-none tracking-tight text-foreground sm:text-6xl md:text-7xl">
-          IHD Times<span className="text-primary">.</span>
+          <Link href="/" className="hover:opacity-90 transition-opacity">
+            IHD Times<span className="text-primary">.</span>
+          </Link>
         </h1>
         <p className="mt-2 font-serif text-[13px] italic text-muted-foreground">
           &ldquo;The only news that matters &mdash; global business, markets &amp; finance, aggregated live.&rdquo;
