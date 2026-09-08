@@ -5,53 +5,79 @@ import { getNews, CATEGORIES, type NewsItem } from "@/lib/news"
 
 export const dynamic = "force-dynamic"
 
-// Smart rule-based Gen-Z headline transformer
+// Unmistakably punchy Gen-Z headline transformer
 function localGenZTitle(title: string): string {
-  let t = title
+  let t = title.trim()
+
+  // 1. Direct financial action replacements
+  t = t
     .replace(/^SEBI approves|^Sebi approves/i, "SEBI Just Greenlit")
-    .replace(/^RBI slaps|^RBI imposes/i, "RBI Drops Penalty On")
+    .replace(/^RBI slaps|^RBI imposes/i, "RBI Slaps Big Fine On")
     .replace(/Sensex slides|Sensex falls|Sensex drops|Nifty tumbles|Nifty slides|Nifty falls|Markets tumble|Markets fall/gi, "Markets Take a Hit")
-    .replace(/Sensex rises|Sensex gains|Sensex surges|Nifty rallies|Nifty jumps|Markets rally|Markets surge/gi, "Markets Pop Big")
+    .replace(/Sensex rises|Sensex gains|Sensex surges|Nifty rallies|Nifty jumps|Markets rally|Markets surge/gi, "Markets Pop Off")
     .replace(/shares rise|shares surge|stock surges|stocks climb|shares gain/gi, "shares pop")
-    .replace(/shares fall|shares slump|shares tumble|stock drops|shares decline|shares slide/gi, "shares dip")
+    .replace(/shares fall|shares slump|shares tumble|stock drops|shares decline|shares slide/gi, "shares dip hard")
     .replace(/record high|all-time peak/gi, "all-time high")
-    .replace(/amid concerns over|amid worries over/gi, "over")
+    .replace(/amid concerns over|amid worries over/gi, "as panic grows over")
     .replace(/according to reports|according to sources|sources say/gi, "per sources")
-    .replace(/significant growth|massive growth/gi, "solid gains")
-    .replace(/strategic partnership|enters into agreement with/gi, "big collab with")
-    .replace(/acquisition of/gi, "buying")
-    .replace(/quarterly profit|net profit rises/gi, "Q-earnings pop")
+    .replace(/significant growth|massive growth/gi, "insane growth")
+    .replace(/strategic partnership|enters into agreement with/gi, "huge collab with")
+    .replace(/acquisition of/gi, "snapping up")
+    .replace(/quarterly profit|net profit rises/gi, "Q-earnings cook")
     .replace(/net profit falls|profit drops/gi, "Q-earnings miss")
-    .replace(/layoffs at|cuts workforce at/gi, "cuts jobs at")
+    .replace(/layoffs at|cuts workforce at/gi, "slashes jobs at")
     .replace(/slams|criticises|condemns/gi, "calls out")
+    .replace(/is flat on debut|trades flat on debut/gi, "vibes flat on listing day")
+    .replace(/gains on debut|surges on debut/gi, "debuts with a massive pop")
+    .replace(/surges after/gi, "pops hard after")
+    .replace(/rallies after/gi, "runs up after")
+    .replace(/loss narrows to/gi, "trims losses to")
+    .replace(/securing supply contract/gi, "bagging a massive deal")
     .trim()
+
+  // 2. If the headline was not altered by specific regex, inject a punchy Gen-Z market hook
+  if (t === title.trim()) {
+    if (/shares|stocks|bse|nse|ipo/i.test(t)) {
+      t = `Market Watch: ${t}`
+    } else if (/profit|revenue|loss|earnings|crore|million|billion/i.test(t)) {
+      t = `Money Moves: ${t}`
+    } else if (/rbi|sebi|govt|tax|policy/i.test(t)) {
+      t = `Policy Check: ${t}`
+    } else {
+      t = `Breaking: ${t}`
+    }
+  }
 
   return t
 }
 
-// Smart rule-based Gen-Z quick overview summarizer
+// Engaging, punchy Gen-Z quick overview summarizer
 function localGenZSummary(rawSummary: string, title: string): string {
-  if (!rawSummary || rawSummary.length < 20) {
-    return `Quick take: Things are moving fast around ${title.slice(0, 50)}. Check the full story at the original source.`
-  }
-
-  // Clean and split into sentences
-  const cleaned = rawSummary
+  // Clean raw HTML artifacts
+  const cleaned = (rawSummary || "")
     .replace(/&nbsp;/gi, " ")
-    .replace(/\s+/g, " ")
+    .replace(/<!\[CDATA\[|\]\]>/g, "")
+    .replace(/<[^>]*>/g, " ")
     .replace(/Also Read:.*$/i, "")
     .replace(/Read more at:.*$/i, "")
     .replace(/Click here to.*$/i, "")
+    .replace(/\s+/g, " ")
     .trim()
 
-  const sentences = cleaned.split(/(?<=[.?!])\s+/).filter(Boolean)
-  let quickSummary = sentences.slice(0, 2).join(" ")
-
-  if (quickSummary.length > 220) {
-    quickSummary = quickSummary.slice(0, 217).trim() + "..."
+  let body = ""
+  if (cleaned.length >= 25) {
+    const sentences = cleaned.split(/(?<=[.?!])\s+/).filter(Boolean)
+    body = sentences.slice(0, 2).join(" ")
+  } else {
+    body = `Big developments unfolding around ${title.slice(0, 60)}.`
   }
 
-  return quickSummary
+  if (body.length > 200) {
+    body = body.slice(0, 197).trim() + "..."
+  }
+
+  // Prepend an engaging conversational hook
+  return `The lowdown: ${body}`
 }
 
 async function rewriteNewsBatch(items: NewsItem[]): Promise<NewsItem[]> {
