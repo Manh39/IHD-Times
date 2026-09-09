@@ -151,13 +151,13 @@ export function DailySudokuModal({
         next[r][c] = 0
         setBoard(next)
       } else if (e.key === "ArrowUp") {
-        setSelectedCell(([r, c]) => [Math.max(0, r - 1), c])
+        setSelectedCell((prev) => (prev ? [Math.max(0, prev[0] - 1), prev[1]] : [0, 0]))
       } else if (e.key === "ArrowDown") {
-        setSelectedCell(([r, c]) => [Math.min(8, r + 1), c])
+        setSelectedCell((prev) => (prev ? [Math.min(8, prev[0] + 1), prev[1]] : [0, 0]))
       } else if (e.key === "ArrowLeft") {
-        setSelectedCell(([r, c]) => [r, Math.max(0, c - 1)])
+        setSelectedCell((prev) => (prev ? [prev[0], Math.max(0, prev[1] - 1)] : [0, 0]))
       } else if (e.key === "ArrowRight") {
-        setSelectedCell(([r, c]) => [r, Math.min(8, c + 1)])
+        setSelectedCell((prev) => (prev ? [prev[0], Math.min(8, prev[1] + 1)] : [0, 0]))
       } else if (e.key === "Escape") {
         onClose()
       }
