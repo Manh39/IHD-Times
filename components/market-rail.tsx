@@ -4,6 +4,7 @@ import { useState } from "react"
 import useSWR from "swr"
 import { clockTime } from "@/lib/format-time"
 import { DailySudokuModal } from "@/components/daily-sudoku"
+import { JARGON_VOCABULARY } from "@/components/jargon-welcome-modal"
 
 type Row = { k: string; v: string; c: string; up: boolean }
 type MarketResponse = { updatedAt: string; stale: boolean; indices: Row[]; commodities: Row[]; yields: Row[] }
@@ -418,44 +419,11 @@ function IpoRadarWidget() {
 
 // 3. Gen-Z Word of the Day / Market Jargon Decoded with Test Trigger
 function JargonDecodedWidget({ onOpenModal }: { onOpenModal: () => void }) {
-  const words = [
-    {
-      term: "Anchor Book ⚓",
-      meaning: "A guaranteed block of IPO shares reserved for marquee institutional investors right before bidding opens to the public.",
-      example: "The IPO secured strong validation after sovereign wealth funds fully backed its ₹1,200 Cr anchor book.",
-    },
-    {
-      term: "Grey Market Premium (GMP) 📈",
-      meaning: "The unofficial cash premium traders bid on an unlisted IPO share before it officially rings the listing bell on NSE/BSE.",
-      example: "With a ₹45 GMP over the ₹180 price band, D-Street is pricing in a 25% debut listing pop.",
-    },
-    {
-      term: "Dead Cat Bounce 🐱",
-      meaning: "A temporary baby recovery in a dying, tanking stock just to give traders false hope before it dumps straight back down.",
-      example: "Bro thought the dip was over, but it was just a dead cat bounce.",
-    },
-    {
-      term: "FOMO Buying 💸",
-      meaning: "Panicking and buying a stock at all-time highs because you saw everyone on Twitter flexing their 20% gains.",
-      example: "I bought at the absolute peak out of pure FOMO and now I am holding the bag.",
-    },
-    {
-      term: "Short Squeeze 🚀",
-      meaning: "When bears bet against a company, but sudden massive buying forces them to cover their shorts, blasting the price to outer space.",
-      example: "D-Street bears got completely wrecked in today's epic short squeeze.",
-    },
-    {
-      term: "DRHP 📑",
-      meaning: "Draft Red Herring Prospectus. The mega-document a company files with SEBI before its IPO revealing all its juicy finances and real risks.",
-      example: "Did you read their DRHP before putting bids on that IPO?",
-    },
-  ]
-
   const [currentIndex, setCurrentIndex] = useState(0)
-  const current = words[currentIndex]
+  const current = JARGON_VOCABULARY[currentIndex] ?? JARGON_VOCABULARY[0]
 
   function nextWord() {
-    setCurrentIndex((prev) => (prev + 1) % words.length)
+    setCurrentIndex((prev) => (prev + 1) % JARGON_VOCABULARY.length)
   }
 
   return (
@@ -490,10 +458,10 @@ function JargonDecodedWidget({ onOpenModal }: { onOpenModal: () => void }) {
           {current.term}
         </h4>
         <p className="mt-1 font-sans text-[12.5px] leading-relaxed text-muted-foreground">
-          <strong className="text-foreground">In Plain English:</strong> {current.meaning}
+          <strong className="text-primary">The Real Scoop 💡:</strong> {current.meaning}
         </p>
         <div className="mt-2 rounded bg-muted/60 p-2 font-mono text-[11px] text-foreground/85">
-          💡 <em>&quot;{current.example}&quot;</em>
+          <em>&quot;{current.example}&quot;</em>
         </div>
       </div>
     </div>

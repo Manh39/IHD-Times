@@ -14,57 +14,57 @@ export const JARGON_VOCABULARY: JargonTerm[] = [
   {
     term: "Anchor Book ⚓",
     category: "IPO",
-    meaning: "A guaranteed block of IPO shares reserved for marquee institutional investors right before bidding opens to the public.",
-    example: "The IPO secured strong validation after sovereign wealth funds fully backed its ₹1,200 Cr anchor book.",
+    meaning: "The VIP guest list before the party opens. Big-money sovereign funds and marquee institutions lock in shares early so regular investors don't feel like they're jumping into an empty pool.",
+    example: "Marquee funds fully devoured the ₹1,200 Cr anchor book, giving retail bidders instant FOMO.",
     contextTrigger: "ipo",
   },
   {
     term: "Grey Market Premium (GMP) 📈",
     category: "IPO",
-    meaning: "The unofficial cash premium traders bid on an unlisted IPO share before it officially rings the listing bell on NSE/BSE.",
-    example: "With a ₹45 GMP over the ₹180 price band, D-Street is pricing in a 25% debut listing pop.",
+    meaning: "The Dalal Street street-smart betting slip. It's the cash premium unlisted shares trade at behind closed doors before the actual stock exchange bell rings.",
+    example: "The ₹65 GMP signals D-Street is betting on a massive 30% listing pop on Tuesday.",
     contextTrigger: "ipo",
   },
   {
     term: "Dead Cat Bounce 🐱",
     category: "Markets",
-    meaning: "A temporary, deceptive rally in a sharply falling stock that gives false hope before plunging right back down.",
-    example: "Don't get trapped by today's 2% bounce — with volumes this dry, it's just a classic dead cat bounce.",
+    meaning: "Even a dead cat will bounce if dropped from a tall skyscraper. A fake baby rally in a doomed, tanking stock designed to trap dip-buyers before plunging right back down.",
+    example: "Bro thought he timed the bottom, but today's 2% green candle was just a dead cat bounce.",
     contextTrigger: "markets",
   },
   {
     term: "Circuit Breaker ⚡",
     category: "Markets",
-    meaning: "An automatic exchange halt triggered when benchmark indices crash or rocket past 10%, 15%, or 20% to curb panic trading.",
-    example: "NSE halted trading for 45 minutes after the lower circuit breaker was breached in morning trade.",
+    meaning: "Dalal Street's mandatory panic timeout. When panic selling or wild greed goes out of hand, the exchange pulls the master plug to force everyone to touch grass for 45 minutes.",
+    example: "The index plunged 10% in 15 minutes, slamming the lower circuit breaker and freezing trades.",
     contextTrigger: "markets",
   },
   {
     term: "Short Squeeze 🚀",
     category: "Markets",
-    meaning: "When bears heavily bet against a stock, but surprise buying forces them to cover and buy back shares at any price, skyrocketing the chart.",
-    example: "Bears scrambling to close positions caused an explosive 14% intraday short squeeze.",
+    meaning: "When cynical bears bet huge money a stock will crash, but surprise buyers take the wheel — forcing panic-stricken bears to buy back shares at crazy prices, sending the stock to the moon.",
+    example: "D-Street bears got totally roasted in an explosive 18% short squeeze.",
     contextTrigger: "markets",
   },
   {
     term: "Repo Rate 🏦",
     category: "Macro",
-    meaning: "The benchmark interest rate at which RBI lends short-term money to commercial banks — directly impacting home loan EMIs.",
-    example: "RBI holding repo rates steady means home loan borrowers won't see their monthly EMIs spike this quarter.",
+    meaning: "The RBI Governor's master interest dial. When RBI tightens it, commercial bank loans get pricier and your monthly EMI screams; when they cut it, the liquidity party starts.",
+    example: "RBI paused repo rate hikes, saving home loan EMIs from another painful bump this month.",
     contextTrigger: "economy",
   },
   {
     term: "Deleveraging 📉",
     category: "Corporate",
-    meaning: "A company aggressively paying off its bank loans and debt burdens rather than reckless expansion.",
-    example: "The management is using free cash flows for rapid deleveraging to turn net-debt-free by FY27.",
+    meaning: "The corporate glow-up. Instead of flexing flashy acquisitions, the company uses its hard cash to aggressively destroy bank debt and clean up its balance sheet.",
+    example: "Management spent the entire quarter deleveraging, turning the company net-debt-free.",
     contextTrigger: "companies",
   },
   {
     term: "Operating Leverage ⚙️",
     category: "Corporate",
-    meaning: "When fixed costs are covered, so every additional rupee of sales flows straight down into exploding profit margins.",
-    example: "Thanks to operating leverage, a 12% bump in revenue translated into a 35% surge in operating profit.",
+    meaning: "The dream financial turbocharger. Once a factory's rent and salaries are paid, every single extra rupee of sales flows straight down into exploding profit margins.",
+    example: "A modest 10% bump in top-line sales translated into a ferocious 40% jump in profit thanks to operating leverage.",
     contextTrigger: "companies",
   },
 ]
@@ -173,8 +173,8 @@ export function JargonWelcomeModal({
           </h3>
 
           <div className="mt-3 border-l-2 border-primary pl-3">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-              In Plain English
+            <p className="text-[11px] font-bold uppercase tracking-wider text-primary">
+              The Real Scoop 💡
             </p>
             <p className="mt-1 font-sans text-[14px] leading-relaxed font-medium text-foreground">
               {current.meaning}

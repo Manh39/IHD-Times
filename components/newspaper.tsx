@@ -8,6 +8,7 @@ import { timeAgo, clockTime } from "@/lib/format-time"
 import { CategoryTabs } from "@/components/category-tabs"
 import { MarketRail } from "@/components/market-rail"
 import { JargonWelcomeModal } from "@/components/jargon-welcome-modal"
+import { MindfulActivityHub } from "@/components/mindful-activity-hub"
 
 type NewsResponse = {
   category: string
@@ -189,9 +190,11 @@ export function Newspaper() {
       {/* Main grid */}
       <div className="mx-auto max-w-[1280px] px-4 py-6">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-0">
-          {/* Left: news content */}
+          {/* Left: news content or mindful activity hub */}
           <div className="lg:pr-6">
-            {error ? (
+            {category === "mindful" ? (
+              <MindfulActivityHub />
+            ) : error ? (
               <div className="border border-loss/40 bg-card p-6 text-center">
                 <p className="font-serif text-lg font-bold text-loss">Newswire unavailable</p>
                 <p className="mt-1 text-sm text-muted-foreground">

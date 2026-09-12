@@ -31,6 +31,7 @@ export const CATEGORIES: Category[] = [
   { id: "startups", label: "Startups & VC" },
   { id: "wealth", label: "Wealth" },
   { id: "world", label: "Global Dial" },
+  { id: "mindful", label: "Mindful Activity ☕" },
 ]
 
 type Feed = { url: string; source: string }
