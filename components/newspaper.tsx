@@ -134,7 +134,7 @@ export function Newspaper() {
     `/api/news?category=${category}`,
     fetcher,
     {
-      refreshInterval: 60 * 60 * 1000, // Automatic refresh strictly on an hourly basis
+      refreshInterval: 10 * 60 * 1000, // Automatic refresh every 10 minutes
       revalidateOnFocus: false, // Don't refresh on window focus
       revalidateOnReconnect: false,
       keepPreviousData: true,

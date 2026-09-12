@@ -164,7 +164,7 @@ async function fetchFeed(feed: Feed, category: string, noStore: boolean): Promis
         Accept: "application/rss+xml, application/xml, text/xml, text/html, */*",
         "Accept-Language": "en-US,en;q=0.9",
       },
-      ...(noStore ? { cache: "no-store" as const } : { next: { revalidate: 3600 } }),
+      ...(noStore ? { cache: "no-store" as const } : { next: { revalidate: 600 } }),
     })
     clearTimeout(timeout)
     if (!res.ok) return []
@@ -399,9 +399,36 @@ type StoryCluster = {
   candidates: NewsItem[]
 }
 
+// Maximum age threshold for fresh news (20 hours max age filter)
+const MAX_STORY_AGE_MS = 20 * 60 * 60 * 1000
+
+// Progressive time decay formula: penalizes older articles so 12h+ stories never overpower breaking news
+function applyTimeDecay(baseScore: number, pubMs: number, now: number): number {
+  const ageHours = Math.max(0, (now - pubMs) / (60 * 60 * 1000))
+  // Grace period for first 1.5 hours (< 1.5h gets 1 pt/hr, thereafter 4.5 pts per hour)
+  const decay = ageHours <= 1.5 ? ageHours * 1.0 : 1.5 + (ageHours - 1.5) * 4.5
+  return Math.max(5, Math.round(baseScore - decay))
+}
+
 function clusterAndSelectBestNews(rawItems: NewsItem[], categoryId: string): NewsItem[] {
-  // Step 1: Filter for relevance and remove noise
-  const relevantItems = rawItems
+  const now = Date.now()
+
+  // Step 1: Filter for age (drop stories older than 20 hours) and noise/relevance
+  let candidates = rawItems.filter((item) => {
+    const ageMs = now - item.pubMs
+    // Allow clock skew up to 1h in the future, and discard stories older than MAX_STORY_AGE_MS (20h)
+    return ageMs >= -3600_000 && ageMs <= MAX_STORY_AGE_MS
+  })
+
+  // Fallback guard: if a niche category has fewer than 5 fresh items, extend filter window to 30h
+  if (candidates.length < 5) {
+    candidates = rawItems.filter((item) => {
+      const ageMs = now - item.pubMs
+      return ageMs >= -3600_000 && ageMs <= 30 * 60 * 60 * 1000
+    })
+  }
+
+  const relevantItems = candidates
     .filter((item) => isRelevantToSection(item, categoryId))
     .map((item) => ({
       ...item,
@@ -438,7 +465,7 @@ function clusterAndSelectBestNews(rawItems: NewsItem[], categoryId: string): New
     }
   }
 
-  // Step 3: For each cluster, pick the BEST jargon-free explanation
+  // Step 3: For each cluster, pick the BEST jargon-free explanation & apply time decay
   const curatedItems: NewsItem[] = clusters.map((cluster) => {
     let bestItem = cluster.candidates[0]
     let highestQuality = -999
@@ -460,22 +487,26 @@ function clusterAndSelectBestNews(rawItems: NewsItem[], categoryId: string): New
 
     // Boost importance if multiple sources reported it (common important news)
     const crossSourceCount = cluster.allSources.size
-    const multiSourceBonus = (crossSourceCount - 1) * 20
-    const finalImportance = (bestItem.importanceScore ?? 50) + multiSourceBonus
+    const multiSourceBonus = (crossSourceCount - 1) * 15
+    const rawImportance = (bestItem.importanceScore ?? 50) + multiSourceBonus
+
+    // Apply time decay: Older stories steadily lose score so fresh breaking news always leads
+    const decayedImportance = applyTimeDecay(rawImportance, bestItem.pubMs, now)
 
     return {
       ...bestItem,
       summary: polishedSummary,
       image: bestImage,
       sources: Array.from(cluster.allSources),
-      importanceScore: finalImportance,
+      importanceScore: decayedImportance,
     }
   })
 
-  // Step 4: Sort by Importance first, then Freshness
+  // Step 4: Sort by Time-Decayed Importance Score and Freshness
   curatedItems.sort((a, b) => {
     const scoreDiff = (b.importanceScore ?? 0) - (a.importanceScore ?? 0)
-    if (Math.abs(scoreDiff) >= 20) return scoreDiff
+    // If scores differ by 12+ points, higher decayed score leads; otherwise newer publication wins
+    if (Math.abs(scoreDiff) >= 12) return scoreDiff
     return b.pubMs - a.pubMs
   })
 
@@ -483,7 +514,7 @@ function clusterAndSelectBestNews(rawItems: NewsItem[], categoryId: string): New
 }
 
 // ---------------------------------------------------------------------------
-// 4. In-Memory Hourly Cache (Refreshes once per hour unless force-refreshed)
+// 4. In-Memory Cache (Refreshes every 10 minutes unless force-refreshed)
 // ---------------------------------------------------------------------------
 
 type CachedCategory = {
@@ -493,13 +524,13 @@ type CachedCategory = {
 }
 
 const HOURLY_CACHE = new Map<string, CachedCategory>()
-const ONE_HOUR_MS = 60 * 60 * 1000 // 1 hour
+const CACHE_TTL_MS = 10 * 60 * 1000 // 10 minutes cache TTL
 
 export async function getNews(categoryId: string, forceRefresh = false): Promise<{ items: NewsItem[]; updatedAt: string }> {
   const now = Date.now()
   const cached = HOURLY_CACHE.get(categoryId)
 
-  // Serve hourly cached dispatch if valid and not a forced manual refresh
+  // Serve 10-minute cached dispatch if valid and not a forced manual refresh
   if (!forceRefresh && cached && cached.expiresAt > now) {
     return {
       items: cached.data,
@@ -526,11 +557,11 @@ export async function getNews(categoryId: string, forceRefresh = false): Promise
   const curated = clusterAndSelectBestNews(all, categoryId)
   const updatedAt = new Date().toISOString()
 
-  // Save to 1-hour cache
+  // Save to 10-minute cache
   HOURLY_CACHE.set(categoryId, {
     data: curated,
     updatedAt,
-    expiresAt: now + ONE_HOUR_MS,
+    expiresAt: now + CACHE_TTL_MS,
   })
 
   return {

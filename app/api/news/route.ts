@@ -153,7 +153,9 @@ export async function GET(req: NextRequest) {
       headers: {
         "Cache-Control": refresh
           ? "no-store"
-          : "public, max-age=3600, stale-while-revalidate=600",
+          : "public, max-age=600, s-maxage=600, stale-while-revalidate=300",
+        "CDN-Cache-Control": refresh ? "no-store" : "public, s-maxage=600",
+        "Vercel-CDN-Cache-Control": refresh ? "no-store" : "public, s-maxage=600",
         "X-Content-Type-Options": "nosniff",
       },
     },
