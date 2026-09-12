@@ -19,7 +19,6 @@ export const metadata: Metadata = {
   title: 'IHD Times — Global Business & Markets',
   description:
     'IHD Times: authoritative daily coverage of global markets, macroeconomics, equities, and corporate finance, aggregated live.',
-  generator: 'v0.app',
   icons: {
     icon: [
       {
