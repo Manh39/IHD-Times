@@ -33,9 +33,60 @@ function Panel({ title, rows }: { title: string; rows: Row[] }) {
   )
 }
 
-// 1. Daily Market Sentiment Meter ("Vibe Check")
-function VibeCheckWidget() {
-  const score = 44
+// 1. Dynamic Market Sentiment Meter ("Vibe Check")
+function VibeCheckWidget({ market }: { market: MarketResponse }) {
+  // Calculate dynamic sentiment from live market data:
+  // 1. Benchmark momentum (Nifty 50, Sensex)
+  const nifty = market.indices.find((i) => i.k.includes("NIFTY 50"))
+  const sensex = market.indices.find((i) => i.k.includes("SENSEX"))
+  const crude = market.commodities.find((c) => c.k.includes("Brent Crude"))
+  const yield10y = market.yields.find((y) => y.k.includes("India 10Y"))
+
+  const parsePercent = (val?: string) => {
+    if (!val) return 0
+    const num = parseFloat(val.replace(/[%+]/g, ""))
+    return isNaN(num) ? 0 : num
+  }
+
+  const niftyChange = parsePercent(nifty?.c)
+  const sensexChange = parsePercent(sensex?.c)
+  const crudeChange = parsePercent(crude?.c)
+  const yieldChange = parsePercent(yield10y?.c)
+
+  // Dynamic formula: Base 50 (Neutral)
+  // + Nifty/Sensex momentum (+- 1% moves score by ~15 pts)
+  // - Crude pressure (crude up > 1.5% increases fear, -5 pts)
+  // - Yield spike (yield up > 0.5% cools sentiment, -5 pts)
+  let rawScore = 50 + ((niftyChange + sensexChange) / 2) * 16
+  if (crudeChange > 1.5) rawScore -= 6
+  else if (crudeChange < -1.5) rawScore += 4
+  if (yieldChange > 0.5) rawScore -= 4
+
+  // Clamp between 5 and 95
+  const score = Math.round(Math.max(8, Math.min(92, rawScore)))
+
+  let moodLabel = "Cautious"
+  let moodColor = "text-amber-500"
+  let explanation = "Cautious vibes across Dalal Street. Nifty consolidating as global macro signals and bond yields guide risk appetite."
+
+  if (score >= 75) {
+    moodLabel = "Extreme Greed"
+    moodColor = "text-gain"
+    explanation = "Euphoric bull momentum on Dalal Street. Broad-based buying across heavyweights with aggressive risk appetite."
+  } else if (score >= 58) {
+    moodLabel = "Greed Mode"
+    moodColor = "text-gain"
+    explanation = "Bulls in control. Positive index momentum and firm institutional inflows supporting Dalal Street sentiment."
+  } else if (score <= 25) {
+    moodLabel = "Extreme Fear"
+    moodColor = "text-loss"
+    explanation = "Heavy risk-off sentiment. Sharp index drag and macro headwinds sparking aggressive profit booking."
+  } else if (score <= 44) {
+    moodLabel = "Fear Mode"
+    moodColor = "text-loss"
+    explanation = "Defensive trading across sectors. Elevated commodity friction and cautious position trimming."
+  }
+
   return (
     <div className="mb-4 border border-border bg-card p-3">
       <div className="flex items-center justify-between border-b border-border pb-1.5">
@@ -43,7 +94,9 @@ function VibeCheckWidget() {
           <span className="inline-block h-3 w-1 bg-primary" aria-hidden />
           Market Vibe Check
         </p>
-        <span className="font-mono text-[11px] font-bold text-amber-500">44 / 100</span>
+        <span className={`font-mono text-[11px] font-bold ${moodColor}`}>
+          {score} / 100 · {moodLabel}
+        </span>
       </div>
 
       <div className="mt-3">
@@ -61,13 +114,13 @@ function VibeCheckWidget() {
           />
           {/* Indicator pin */}
           <div
-            className="absolute top-0 bottom-0 w-1.5 -translate-x-1/2 rounded bg-foreground shadow"
+            className="absolute top-0 bottom-0 w-1.5 -translate-x-1/2 rounded bg-foreground shadow transition-all duration-500"
             style={{ left: `${score}%` }}
           />
         </div>
 
         <p className="mt-2 text-pretty font-sans text-[12px] leading-snug text-muted-foreground">
-          <strong className="text-foreground">Today&apos;s Mood:</strong> Cautious vibes across Dalal Street. Nifty taking breathers as crude oil volatility and Middle East friction cool risk appetite.
+          <strong className="text-foreground">Today&apos;s Mood:</strong> {explanation}
         </p>
       </div>
     </div>
@@ -200,6 +253,7 @@ function formatIpoCard(item: IpoFeedItem, tab: "ongoing" | "upcoming" | "recent"
 // 2. IPO Radar & Tracker with Real Live SWR Feed & Tabs
 function IpoRadarWidget() {
   const [tab, setTab] = useState<"ongoing" | "upcoming" | "recent">("ongoing")
+  const [isExpanded, setIsExpanded] = useState(false)
   const { data, isLoading } = useSWR<IpoApiResponse>("/api/ipos", ipoFetcher, {
     refreshInterval: 60_000,
     revalidateOnFocus: true,
@@ -239,7 +293,9 @@ function IpoRadarWidget() {
       ? fallbackRegistry[tab]
       : []
 
-  const items = sourceItems.map((item) => formatIpoCard(item, tab))
+  const formattedItems = sourceItems.map((item) => formatIpoCard(item, tab))
+  const visibleItems = isExpanded ? formattedItems : formattedItems.slice(0, 4)
+  const remainingCount = formattedItems.length - 4
 
   return (
     <div className="mb-4 border border-border bg-card">
@@ -310,12 +366,12 @@ function IpoRadarWidget() {
               </div>
             ))}
           </div>
-        ) : items.length === 0 ? (
+        ) : visibleItems.length === 0 ? (
           <div className="p-4 text-center text-[11px] text-muted-foreground font-mono">
             No {tab} issues at the moment.
           </div>
         ) : (
-          items.map((item) => (
+          visibleItems.map((item) => (
             <a
               key={item.slug}
               href={`/ipo/${item.slug}`}
@@ -341,13 +397,38 @@ function IpoRadarWidget() {
           ))
         )}
       </div>
+
+      {/* Show More / Show Less Accordion Trigger */}
+      {formattedItems.length > 4 && (
+        <div className="border-t border-border bg-muted/20 text-center">
+          <button
+            type="button"
+            onClick={() => setIsExpanded((prev) => !prev)}
+            className="w-full py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-primary hover:bg-muted/40 transition-colors"
+          >
+            {isExpanded
+              ? "Show Less ↑"
+              : `Show All (+${remainingCount} more ${tab} issues) ↓`}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
 
-// 3. Gen-Z Word of the Day / Market Jargon Decoded
-function JargonDecodedWidget() {
+// 3. Gen-Z Word of the Day / Market Jargon Decoded with Test Trigger
+function JargonDecodedWidget({ onOpenModal }: { onOpenModal: () => void }) {
   const words = [
+    {
+      term: "Anchor Book ⚓",
+      meaning: "A guaranteed block of IPO shares reserved for marquee institutional investors right before bidding opens to the public.",
+      example: "The IPO secured strong validation after sovereign wealth funds fully backed its ₹1,200 Cr anchor book.",
+    },
+    {
+      term: "Grey Market Premium (GMP) 📈",
+      meaning: "The unofficial cash premium traders bid on an unlisted IPO share before it officially rings the listing bell on NSE/BSE.",
+      example: "With a ₹45 GMP over the ₹180 price band, D-Street is pricing in a 25% debut listing pop.",
+    },
     {
       term: "Dead Cat Bounce 🐱",
       meaning: "A temporary baby recovery in a dying, tanking stock just to give traders false hope before it dumps straight back down.",
@@ -383,14 +464,25 @@ function JargonDecodedWidget() {
         <span className="font-serif text-[11px] font-black uppercase tracking-[0.2em] text-primary">
           Market Jargon · Decoded
         </span>
-        <button
-          type="button"
-          onClick={nextWord}
-          className="font-mono text-[10px] font-bold uppercase text-foreground hover:text-primary"
-          title="Click to shuffle word"
-        >
-          Shuffle ↺
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onOpenModal}
+            className="font-mono text-[9.5px] font-bold uppercase text-primary hover:underline"
+            title="Preview the 8:00 AM full-screen blur briefing modal"
+          >
+            Preview Overlay 👁️
+          </button>
+          <span aria-hidden>·</span>
+          <button
+            type="button"
+            onClick={nextWord}
+            className="font-mono text-[9.5px] font-bold uppercase text-foreground hover:text-primary"
+            title="Click to shuffle word"
+          >
+            Shuffle ↺
+          </button>
+        </div>
       </div>
 
       <div className="mt-2.5">
@@ -408,35 +500,50 @@ function JargonDecodedWidget() {
   )
 }
 
-// 4. Daily Sudoku Launcher Widget
-function SudokuLauncherWidget({ onOpen }: { onOpen: () => void }) {
+// 4. Mindful Activity Section (Hosting Daily Morning Coffee Sudoku & future puzzles)
+function MindfulActivitySection({ onOpenSudoku }: { onOpenSudoku: () => void }) {
   return (
-    <div className="mb-4 border-2 border-double border-foreground bg-secondary/40 p-3.5 text-center">
-      <div className="mb-1 flex items-center justify-center gap-2">
-        <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-        <span className="font-serif text-[10.5px] font-black uppercase tracking-[0.22em] text-primary">
-          Daily Newspaper Game
+    <div className="mb-4 border-2 border-border bg-card p-3.5">
+      <div className="flex items-center justify-between border-b border-border pb-1.5 mb-3">
+        <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-foreground">
+          <span className="inline-block h-3 w-1 bg-primary" aria-hidden />
+          Mindful Activity
+        </p>
+        <span className="rounded bg-primary/10 px-1.5 py-0.5 font-mono text-[9.5px] font-bold uppercase tracking-wider text-primary">
+          Daily Drop
         </span>
       </div>
-      <h4 className="font-serif text-lg font-black text-foreground">
-        Morning Coffee Sudoku
-      </h4>
-      <p className="mt-1 font-sans text-[11.5px] leading-snug text-muted-foreground">
-        A fresh 9x9 board drops every morning at 6:00 AM IST. Play directly right on this page — zero redirects.
+
+      {/* Sudoku Sub-Widget */}
+      <div className="border border-border bg-secondary/30 p-3 text-center">
+        <div className="mb-1 flex items-center justify-center gap-2">
+          <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="font-serif text-[10.5px] font-black uppercase tracking-[0.22em] text-primary">
+            Morning Coffee Sudoku
+          </span>
+        </div>
+        <p className="mt-1 font-sans text-[11.5px] leading-snug text-muted-foreground">
+          A fresh 9x9 board drops daily at 6:00 AM IST. Relax and test your logic right here — zero popups or redirects.
+        </p>
+        <button
+          type="button"
+          onClick={onOpenSudoku}
+          className="mt-3 inline-flex w-full items-center justify-center gap-2 border border-foreground bg-foreground py-2 font-mono text-[12px] font-bold uppercase tracking-wider text-background transition-opacity hover:opacity-85"
+        >
+          <span>☕ Play Today&apos;s Grid</span>
+          <span aria-hidden>&rarr;</span>
+        </button>
+      </div>
+
+      {/* Future activity tease */}
+      <p className="mt-2 text-center font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+        Crosswords &amp; Market Quizzes arriving soon
       </p>
-      <button
-        type="button"
-        onClick={onOpen}
-        className="mt-3 inline-flex w-full items-center justify-center gap-2 border border-foreground bg-foreground py-2 font-mono text-[12px] font-bold uppercase tracking-wider text-background transition-opacity hover:opacity-85"
-      >
-        <span>☕ Play Today&apos;s Grid</span>
-        <span aria-hidden>&rarr;</span>
-      </button>
     </div>
   )
 }
 
-export function MarketRail() {
+export function MarketRail({ onTriggerJargonModal }: { onTriggerJargonModal?: () => void }) {
   const [isSudokuOpen, setIsSudokuOpen] = useState(false)
   const { data, error, isValidating, mutate } = useSWR<MarketResponse>("/api/markets", fetcher, {
     refreshInterval: 60_000,
@@ -459,22 +566,22 @@ export function MarketRail() {
         </button>
       </div>
 
-      {/* 1. Daily Market Sentiment Gauge */}
-      <VibeCheckWidget />
-
-      {/* 2. IPO Radar & Tracker */}
-      <IpoRadarWidget />
-
-      {/* 3. Daily Sudoku Game Launcher */}
-      <SudokuLauncherWidget onOpen={() => setIsSudokuOpen(true)} />
-
-      {/* 4. Market Tickers & Yields */}
+      {/* 1. Market Tickers & Yields (Position 1) */}
       <Panel title="Yield Curve Update" rows={market.yields} />
       <Panel title="India First · Index Snapshot" rows={market.indices} />
       <Panel title="Commodities & FX" rows={market.commodities} />
 
-      {/* 5. Gen Z Jargon of the Day (with Shuffle) */}
-      <JargonDecodedWidget />
+      {/* 2. Dynamic Market Sentiment Gauge (Position 2) */}
+      <VibeCheckWidget market={market} />
+
+      {/* 3. Compact IPO Radar & Tracker with Show More (Position 3) */}
+      <IpoRadarWidget />
+
+      {/* 4. Mindful Activity Section (Position 4) */}
+      <MindfulActivitySection onOpenSudoku={() => setIsSudokuOpen(true)} />
+
+      {/* 5. Jargon of the Day (Position 5) */}
+      <JargonDecodedWidget onOpenModal={onTriggerJargonModal ?? (() => {})} />
 
       <p className="mt-1 text-[10.5px] leading-snug text-muted-foreground">
         {error || market.stale

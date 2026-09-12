@@ -7,6 +7,7 @@ import { CATEGORIES } from "@/lib/news"
 import { timeAgo, clockTime } from "@/lib/format-time"
 import { CategoryTabs } from "@/components/category-tabs"
 import { MarketRail } from "@/components/market-rail"
+import { JargonWelcomeModal } from "@/components/jargon-welcome-modal"
 
 type NewsResponse = {
   category: string
@@ -126,6 +127,7 @@ function SkeletonCard() {
 
 export function Newspaper() {
   const [category, setCategory] = useState("all")
+  const [isJargonModalForced, setIsJargonModalForced] = useState(false)
 
   const { data, error, isLoading, isValidating, mutate } = useSWR<NewsResponse>(
     `/api/news?category=${category}`,
@@ -233,10 +235,16 @@ export function Newspaper() {
 
           {/* Right: market data rail */}
           <div className="border-border lg:border-l lg:pl-6">
-            <MarketRail />
+            <MarketRail onTriggerJargonModal={() => setIsJargonModalForced(true)} />
           </div>
         </div>
       </div>
+
+      {/* 8:00 AM Context-Aware Market Jargon Blur Welcome Modal */}
+      <JargonWelcomeModal
+        forceOpen={isJargonModalForced}
+        onClose={() => setIsJargonModalForced(false)}
+      />
     </div>
   )
 }
