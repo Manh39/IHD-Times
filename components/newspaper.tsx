@@ -21,11 +21,19 @@ const fetcher = async (url: string): Promise<NewsResponse> => {
   return res.json()
 }
 
-function SourceTag({ source }: { source: string }) {
+function SourceTag({ source, sources }: { source: string; sources?: string[] }) {
+  const isMultiSource = sources && sources.length > 1
   return (
-    <span className="bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
-      {source}
-    </span>
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span className="bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
+        {source}
+      </span>
+      {isMultiSource && (
+        <span className="border border-emerald-600/40 bg-emerald-500/10 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+          Also on {sources.filter((s) => s !== source).join(", ")}
+        </span>
+      )}
+    </div>
   )
 }
 
@@ -33,7 +41,7 @@ function Kicker({ item }: { item: NewsItem }) {
   const label = CATEGORIES.find((c) => c.id === item.category)?.label ?? "Newswire"
   return (
     <div className="mb-2 flex flex-wrap items-center gap-2 text-[10.5px] uppercase tracking-wider text-muted-foreground">
-      <SourceTag source={item.source} />
+      <SourceTag source={item.source} sources={item.sources} />
       <span className="font-semibold text-foreground">{label}</span>
       <span aria-hidden>·</span>
       <time dateTime={item.pubDate}>{clockTime(item.pubDate)}</time>
@@ -123,8 +131,9 @@ export function Newspaper() {
     `/api/news?category=${category}`,
     fetcher,
     {
-      refreshInterval: 5 * 60 * 1000,
-      revalidateOnFocus: true,
+      refreshInterval: 60 * 60 * 1000, // Automatic refresh strictly on an hourly basis
+      revalidateOnFocus: false, // Don't refresh on window focus
+      revalidateOnReconnect: false,
       keepPreviousData: true,
     },
   )

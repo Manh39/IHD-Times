@@ -139,19 +139,21 @@ export async function GET(req: NextRequest) {
   const valid = CATEGORIES.some((c) => c.id === category)
   const categoryId = valid ? category : "all"
 
-  const items = await getNews(categoryId, refresh)
+  const { items, updatedAt } = await getNews(categoryId, refresh)
   const personalized = await rewriteNewsBatch(items)
 
   return Response.json(
     {
       category: categoryId,
-      updatedAt: new Date().toISOString(),
+      updatedAt,
       count: personalized.length,
       items: personalized,
     },
     {
       headers: {
-        "Cache-Control": "no-store",
+        "Cache-Control": refresh
+          ? "no-store"
+          : "public, max-age=3600, stale-while-revalidate=600",
         "X-Content-Type-Options": "nosniff",
       },
     },
